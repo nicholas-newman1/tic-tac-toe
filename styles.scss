@@ -109,7 +109,7 @@ html {
     &::after {
       content: '';
       height: 3px;
-      width: 20px;
+      width: 60px;
       background: white;
       position: absolute;
       top: 100%;
@@ -131,8 +131,8 @@ html {
     }
   }
 
-  &__btn + &__btn {
-    margin-top: 0.75rem;
+  &__btn {
+    margin-top: 1rem;
   }
 }
 
@@ -151,7 +151,7 @@ html {
   }
 
   &__player-label,
-  &__mode-label {
+  &__radio-label {
     color: white;
     font-size: 1.25rem;
   }
@@ -170,23 +170,50 @@ html {
     margin-top: 0.5rem;
   }
 
-  &__mode {
-    margin: 1rem 0;
+  &__sub-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 auto;
+    position: relative;
+    @include centerX();
+    display: inline-block;
+
+    &::after {
+      content: '';
+      height: 2px;
+      width: 30px;
+      background: white;
+      position: absolute;
+      top: 100%;
+      @include centerX();
+    }
+  }
+
+  &__radio-container {
+    background: #555;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border-radius: 5px;
+  }
+
+  &__radio-inputs {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
   }
 
-  &__mode-label {
-    margin: 0.5rem;
+  &__radio-label {
+    margin: 0 1rem;
+    margin-top: 1rem;
   }
 
-  &__mode-input {
+  &__radio-input {
     margin-right: 0.5rem;
   }
 
-  &__mode-label,
-  &__mode-input {
+  &__radio-label,
+  &__radio-input {
     cursor: pointer;
   }
 }

@@ -4,6 +4,7 @@ const Game = (() => {
   let _playerOne = { symbol: 'X' };
   let _playerTwo = { symbol: 'O' };
   let _mode;
+  let _difficulty = 'easy';
   let _display = false;
   let _isGameInProgress = false;
   let _currentPlayer = _playerOne;
@@ -16,10 +17,11 @@ const Game = (() => {
   'o' = static O */
   let _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-  const init = ({ playerOneName, playerTwoName, mode }) => {
+  const init = ({ playerOneName, playerTwoName, mode, difficulty }) => {
     if (mode === 'singleplayer') {
       _playerOne.name = 'Player';
       _playerTwo.name = 'Computer';
+      _difficulty = difficulty;
     } else if (mode === 'twoplayer') {
       _playerOne.name = playerOneName || 'Player 1';
       _playerTwo.name = playerTwoName || 'Player 2';
@@ -273,6 +275,7 @@ const Menu = (() => {
   let _playerOneName = '';
   let _playerTwoName = '';
   let _mode = 'singleplayer';
+  let _difficulty = 'easy';
 
   const render = () => {
     let menu = document.querySelector('.menu');
@@ -285,6 +288,7 @@ const Menu = (() => {
       playerOneName: _playerOneName,
       playerTwoName: _playerTwoName,
       mode: _mode,
+      difficulty: _difficulty,
     };
   };
 
@@ -302,18 +306,25 @@ const Menu = (() => {
     render();
   };
 
-  const _setMode = (value) => {
-    _mode = value;
-
-    render();
-  };
-
   const reset = () => {
     _display = true;
     _current = 'main-menu';
     _playerOneName = '';
     _playerTwoName = '';
     _mode = 'singleplayer';
+    _difficulty = 'easy';
+
+    render();
+  };
+
+  const _setMode = (value) => {
+    _mode = value;
+
+    render();
+  };
+
+  const _setDifficulty = (value) => {
+    _difficulty = value;
 
     render();
   };
@@ -390,17 +401,27 @@ const Menu = (() => {
     });
     playerTwoLabel.appendChild(playerTwoInput);
 
+    // Mode Input Container
     const modeContainer = document.createElement('div');
-    modeContainer.classList = 'new-game-menu__mode';
+    modeContainer.classList = 'new-game-menu__radio-container';
     newGameMenu.appendChild(modeContainer);
 
+    const modeHeading = document.createElement('h3');
+    modeHeading.classList = 'new-game-menu__sub-heading';
+    modeHeading.innerHTML = 'Mode';
+    modeContainer.appendChild(modeHeading);
+
+    const modeInputContainer = document.createElement('div');
+    modeInputContainer.classList = 'new-game-menu__radio-inputs';
+    modeContainer.appendChild(modeInputContainer);
+
     const singleplayerLabel = document.createElement('label');
-    singleplayerLabel.classList = 'new-game-menu__mode-label';
+    singleplayerLabel.classList = 'new-game-menu__radio-label';
     singleplayerLabel.innerHTML = '1-Player';
-    modeContainer.appendChild(singleplayerLabel);
+    modeInputContainer.appendChild(singleplayerLabel);
 
     const singleplayerInput = document.createElement('input');
-    singleplayerInput.classList = 'new-game-menu__mode-input';
+    singleplayerInput.classList = 'new-game-menu__radio-input';
     singleplayerInput.type = 'radio';
     singleplayerInput.value = 'singleplayer';
     singleplayerInput.name = 'mode';
@@ -414,18 +435,53 @@ const Menu = (() => {
     );
 
     const twoplayerLabel = document.createElement('label');
-    twoplayerLabel.classList = 'new-game-menu__mode-label';
+    twoplayerLabel.classList = 'new-game-menu__radio-label';
     twoplayerLabel.innerHTML = '2-Player';
-    modeContainer.appendChild(twoplayerLabel);
+    modeInputContainer.appendChild(twoplayerLabel);
 
     const twoplayerInput = document.createElement('input');
-    twoplayerInput.classList = 'new-game-menu__mode-input';
+    twoplayerInput.classList = 'new-game-menu__radio-input';
     twoplayerInput.type = 'radio';
     twoplayerInput.value = 'twoplayer';
     twoplayerInput.name = 'mode';
     if (_mode === 'twoplayer') twoplayerInput.checked = 'checked';
     twoplayerInput.addEventListener('change', () => _setMode('twoplayer'));
     twoplayerLabel.insertBefore(twoplayerInput, twoplayerLabel.firstChild);
+
+    // Difficulty Input Container
+    const difficultyContainer = document.createElement('div');
+    difficultyContainer.classList = 'new-game-menu__radio-container';
+    _mode === 'twoplayer' && difficultyContainer.classList.add('hidden');
+    newGameMenu.appendChild(difficultyContainer);
+
+    const difficultyHeading = document.createElement('h3');
+    difficultyHeading.classList = 'new-game-menu__sub-heading';
+    difficultyHeading.innerHTML = 'Difficulty';
+    difficultyContainer.appendChild(difficultyHeading);
+
+    const difficultyInputContainer = document.createElement('div');
+    difficultyInputContainer.classList = 'new-game-menu__radio-inputs';
+    difficultyContainer.appendChild(difficultyInputContainer);
+
+    const _appendDifficultyInput = (value, labelText) => {
+      const label = document.createElement('label');
+      label.classList = 'new-game-menu__radio-label';
+      label.innerHTML = labelText;
+      difficultyInputContainer.appendChild(label);
+
+      const input = document.createElement('input');
+      input.classList = 'new-game-menu__radio-input';
+      input.type = 'radio';
+      input.value = value;
+      input.name = 'difficulty';
+      if (_difficulty === value) input.checked = 'checked';
+      input.addEventListener('change', () => _setDifficulty(value));
+      label.insertBefore(input, label.firstChild);
+    };
+
+    _appendDifficultyInput('easy', 'Noob');
+    _appendDifficultyInput('medium', 'Pro');
+    _appendDifficultyInput('hard', 'Suicidal');
 
     const startBtn = document.createElement('button');
     startBtn.id = 'start-btn';

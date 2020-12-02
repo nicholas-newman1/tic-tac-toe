@@ -87,7 +87,7 @@ html {
 .menu__heading::after {
   content: "";
   height: 3px;
-  width: 20px;
+  width: 60px;
   background: white;
   position: absolute;
   top: 100%;
@@ -106,8 +106,8 @@ html {
   cursor: pointer;
   background: #bbb;
 }
-.menu__btn + .menu__btn {
-  margin-top: 0.75rem;
+.menu__btn {
+  margin-top: 1rem;
 }
 
 .main-menu {
@@ -123,7 +123,7 @@ html {
   display: flex;
   flex-direction: column;
 }
-.new-game-menu__player-label, .new-game-menu__mode-label {
+.new-game-menu__player-label, .new-game-menu__radio-label {
   color: white;
   font-size: 1.25rem;
 }
@@ -139,19 +139,45 @@ html {
   border-radius: 5px;
   margin-top: 0.5rem;
 }
-.new-game-menu__mode {
-  margin: 1rem 0;
+.new-game-menu__sub-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 auto;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+}
+.new-game-menu__sub-heading::after {
+  content: "";
+  height: 2px;
+  width: 30px;
+  background: white;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.new-game-menu__radio-container {
+  background: #555;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  border-radius: 5px;
+}
+.new-game-menu__radio-inputs {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
 }
-.new-game-menu__mode-label {
-  margin: 0.5rem;
+.new-game-menu__radio-label {
+  margin: 0 1rem;
+  margin-top: 1rem;
 }
-.new-game-menu__mode-input {
+.new-game-menu__radio-input {
   margin-right: 0.5rem;
 }
-.new-game-menu__mode-label, .new-game-menu__mode-input {
+.new-game-menu__radio-label, .new-game-menu__radio-input {
   cursor: pointer;
 }
 
