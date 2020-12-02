@@ -47,6 +47,10 @@ const Game = (() => {
     _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     _winningCombo = [];
 
+    if (_mode === 'singleplayer' && _currentPlayer.name === 'Computer') {
+      _computerMove();
+    }
+
     render();
   };
 
@@ -76,7 +80,33 @@ const Game = (() => {
 
     _checkWinner();
     !_getIsGameOver() && _toggleCurrentPlayer();
+
+    if (
+      _mode === 'singleplayer' &&
+      _currentPlayer.name === 'Computer' &&
+      !_getIsGameOver()
+    ) {
+      _computerMove();
+    }
+
     render();
+  };
+
+  const _computerMove = () => {
+    const emptySquares = _getEmptySquares();
+    const randomIndex = _getRandomInt(emptySquares.length);
+    const randomSquare = emptySquares[randomIndex];
+    _makeMove(randomSquare);
+  };
+
+  const _getEmptySquares = () => {
+    let emptySquares = [];
+    _gameData.forEach((symbol, i) => symbol === 0 && emptySquares.push(i));
+    return emptySquares;
+  };
+
+  const _getRandomInt = (max) => {
+    return Math.floor(Math.random() * Math.floor(max));
   };
 
   const _getIsWinner = () => _winningCombo.length > 0;
@@ -242,7 +272,7 @@ const Menu = (() => {
   let _current = 'main-menu';
   let _playerOneName = '';
   let _playerTwoName = '';
-  let _mode = 'twoplayer';
+  let _mode = 'singleplayer';
 
   const render = () => {
     let menu = document.querySelector('.menu');
@@ -283,7 +313,7 @@ const Menu = (() => {
     _current = 'main-menu';
     _playerOneName = '';
     _playerTwoName = '';
-    _mode = 'twoplayer';
+    _mode = 'singleplayer';
 
     render();
   };
@@ -365,7 +395,7 @@ const Menu = (() => {
     newGameMenu.appendChild(modeContainer);
 
     const singleplayerLabel = document.createElement('label');
-    singleplayerLabel.classList = 'new-game-menu__mode-label hidden';
+    singleplayerLabel.classList = 'new-game-menu__mode-label';
     singleplayerLabel.innerHTML = '1-Player';
     modeContainer.appendChild(singleplayerLabel);
 
