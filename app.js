@@ -17,6 +17,17 @@ const Game = (() => {
   'o' = static O */
   let _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
+  const winningCombos = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
   const init = ({ playerOneName, playerTwoName, mode, difficulty }) => {
     if (mode === 'singleplayer') {
       _playerOne.name = 'Player';
@@ -79,6 +90,7 @@ const Game = (() => {
       return item;
     });
     _gameData[id] = _currentPlayer.symbol;
+    render();
 
     _checkWinner();
     !_getIsGameOver() && _toggleCurrentPlayer();
@@ -95,16 +107,102 @@ const Game = (() => {
   };
 
   const _computerMove = () => {
-    const emptySquares = _getEmptySquares();
-    const randomIndex = _getRandomInt(emptySquares.length);
-    const randomSquare = emptySquares[randomIndex];
-    _makeMove(randomSquare);
+    const computerOccupiedSquareIds = _getOccupiedSquareIds();
+    const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
+
+    // check if computer has a winning move and return it
+    const getWinningMove = () => {
+      /* find combo that has two of its squares occupied by computer and none
+      occupied by the user */
+      const potentialWinningCombo = winningCombos.find((winningCombo) => {
+        return (
+          !winningCombo.some((id) => userOccupiedSquareIds.includes(id)) &&
+          winningCombo.filter((id) => computerOccupiedSquareIds.includes(id))
+            .length === 2
+        );
+      });
+
+      if (potentialWinningCombo) {
+        // return computer's winning move
+        return potentialWinningCombo.find(
+          (id) => !computerOccupiedSquareIds.includes(id)
+        );
+      }
+    };
+
+    // check if user has a winning move and return it
+    const getPreventativeMove = () => {
+      /* find winningCombo that has two of its squares occupied by user and none
+      occupied by the computer */
+      const potentialWinningCombo = winningCombos.find((winningCombo) => {
+        return (
+          !winningCombo.some((id) => computerOccupiedSquareIds.includes(id)) &&
+          winningCombo.filter((id) => userOccupiedSquareIds.includes(id))
+            .length === 2
+        );
+      });
+
+      if (potentialWinningCombo) {
+        // return user's winning move
+        return potentialWinningCombo.find(
+          (id) => !userOccupiedSquareIds.includes(id)
+        );
+      }
+    };
+
+    const getRandomMove = () => {
+      const emptySquareIds = _getEmptySquareIds();
+      const randomIndex = _getRandomInt(emptySquareIds.length);
+      return emptySquareIds[randomIndex];
+    };
+
+    const isWinningMoveAvailable = () => {
+      return typeof getWinningMove() === 'number';
+    };
+
+    const isPreventativeMoveAvailable = () => {
+      return typeof getPreventativeMove() === 'number';
+    };
+
+    if (_difficulty === 'easy') {
+      _makeMove(getRandomMove());
+    } else if (_difficulty === 'medium') {
+      if (isWinningMoveAvailable) {
+        _makeMove(getWinningMove());
+      } else if (isPreventativeMoveAvailable()) {
+        _makeMove(getPreventativeMove());
+      } else {
+        _makeMove(gerRandomMove());
+      }
+    } else if (_difficulty === 'hard') {
+      if (isWinningMoveAvailable()) {
+        _makeMove(getWinningMove());
+      } else if (isPreventativeMoveAvailable()) {
+        _makeMove(getPreventativeMove());
+      } else {
+        _makeMove(getRandomMove());
+      }
+    } else {
+      throw new Error('Invalid _difficulty');
+    }
   };
 
-  const _getEmptySquares = () => {
-    let emptySquares = [];
-    _gameData.forEach((symbol, i) => symbol === 0 && emptySquares.push(i));
-    return emptySquares;
+  const _getEmptySquareIds = () => {
+    let emptySquareIds = [];
+    _gameData.forEach((symbol, i) => symbol === 0 && emptySquareIds.push(i));
+    return emptySquareIds;
+  };
+
+  const _getOccupiedSquareIds = (playerSymbol = _currentPlayer.symbol) => {
+    let occupiedSquareIds = _gameData
+      .map((symbol, i) => {
+        if (symbol !== 0 && symbol.toUpperCase() === playerSymbol) {
+          return i;
+        }
+      })
+      .filter((item) => item !== undefined);
+
+    return occupiedSquareIds;
   };
 
   const _getRandomInt = (max) => {
@@ -116,27 +214,10 @@ const Game = (() => {
   const _getIsGameOver = () => _getIsWinner() || _getIsTie();
 
   const _checkWinner = () => {
-    const winningCombos = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    let occupiedIndexes = _gameData
-      .map((symbol, i) => {
-        if (symbol !== 0 && symbol.toUpperCase() === _currentPlayer.symbol) {
-          return i;
-        }
-      })
-      .filter((item) => item !== undefined);
+    const occupiedSquareIds = _getOccupiedSquareIds();
 
     const winningCombo = winningCombos.find((winningCombo) =>
-      winningCombo.every((i) => occupiedIndexes.includes(i))
+      winningCombo.every((i) => occupiedSquareIds.includes(i))
     );
 
     if (winningCombo) _endGame(winningCombo);

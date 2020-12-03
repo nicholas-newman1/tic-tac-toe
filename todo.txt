@@ -1,2 +1,4 @@
 - add reset function to Game module
 - reset game on clicking newGameBtn
+- bug: if user's winning move is computer's winning move, the user will lose
+- bug: computer doesn't always play the preventative move
