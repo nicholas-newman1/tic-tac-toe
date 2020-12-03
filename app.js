@@ -8,6 +8,7 @@ const Game = (() => {
   let _display = false;
   let _isGameInProgress = false;
   let _currentPlayer = _playerOne;
+  let _firstPlayer = _playerOne;
   let _winningCombo = [];
 
   /* 0 = empty    
@@ -47,6 +48,7 @@ const Game = (() => {
 
   const reset = () => {
     _currentPlayer = _playerOne;
+    _firstPlayer = _playerOne;
     _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     _winningCombo = [];
     _display = false;
@@ -56,7 +58,8 @@ const Game = (() => {
   };
 
   const continueGame = () => {
-    _toggleCurrentPlayer();
+    _currentPlayer = _getOppositePlayer(_firstPlayer);
+    _firstPlayer = _getOppositePlayer(_firstPlayer);
     _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     _winningCombo = [];
 
@@ -83,6 +86,10 @@ const Game = (() => {
     }
   };
 
+  const _getOppositePlayer = (player) => {
+    return player === _playerOne ? _playerTwo : _playerOne;
+  };
+
   const _makeMove = (id) => {
     _gameData = _gameData.map((item) => {
       if (item === 'X') return 'x';
@@ -102,8 +109,6 @@ const Game = (() => {
     ) {
       _computerMove();
     }
-
-    render();
   };
 
   const _computerMove = () => {
@@ -167,12 +172,12 @@ const Game = (() => {
     if (_difficulty === 'easy') {
       _makeMove(getRandomMove());
     } else if (_difficulty === 'medium') {
-      if (isWinningMoveAvailable) {
+      if (isWinningMoveAvailable()) {
         _makeMove(getWinningMove());
       } else if (isPreventativeMoveAvailable()) {
         _makeMove(getPreventativeMove());
       } else {
-        _makeMove(gerRandomMove());
+        _makeMove(getRandomMove());
       }
     } else if (_difficulty === 'hard') {
       if (isWinningMoveAvailable()) {
@@ -185,6 +190,8 @@ const Game = (() => {
     } else {
       throw new Error('Invalid _difficulty');
     }
+
+    render();
   };
 
   const _getEmptySquareIds = () => {
