@@ -30,6 +30,8 @@ const Game = (() => {
   ];
 
   const init = ({ playerOneName, playerTwoName, mode, difficulty }) => {
+    reset();
+
     if (mode === 'singleplayer') {
       _playerOne.name = 'Player';
       _playerTwo.name = 'Computer';
@@ -43,6 +45,7 @@ const Game = (() => {
 
     _isGameInProgress = true;
     _display = true;
+
     render();
   };
 
@@ -55,6 +58,12 @@ const Game = (() => {
     _isGameInProgress = false;
 
     render();
+  };
+
+  const render = () => {
+    let game = document.querySelector('.game');
+    if (game) game.remove();
+    root.appendChild(_create());
   };
 
   const continueGame = () => {
@@ -70,21 +79,13 @@ const Game = (() => {
     render();
   };
 
-  const getIsGameInProgress = () => _isGameInProgress;
-
   const toggleDisplay = () => {
     _display = !_display;
 
     render();
   };
 
-  const _toggleCurrentPlayer = () => {
-    if (_currentPlayer === _playerOne) {
-      _currentPlayer = _playerTwo;
-    } else {
-      _currentPlayer = _playerOne;
-    }
-  };
+  const getIsGameInProgress = () => _isGameInProgress;
 
   const _getOppositePlayer = (player) => {
     return player === _playerOne ? _playerTwo : _playerOne;
@@ -109,6 +110,53 @@ const Game = (() => {
     ) {
       _computerMove();
     }
+  };
+
+  const _toggleCurrentPlayer = () => {
+    if (_currentPlayer === _playerOne) {
+      _currentPlayer = _playerTwo;
+    } else {
+      _currentPlayer = _playerOne;
+    }
+  };
+
+  const _getIsWinner = () => _winningCombo.length > 0;
+  const _getIsTie = () => !_gameData.some((value) => value === 0);
+  const _getIsGameOver = () => _getIsWinner() || _getIsTie();
+
+  const _checkWinner = () => {
+    const occupiedSquareIds = _getOccupiedSquareIds();
+
+    const winningCombo = winningCombos.find((winningCombo) =>
+      winningCombo.every((i) => occupiedSquareIds.includes(i))
+    );
+
+    if (winningCombo) _endGame(winningCombo);
+    return;
+  };
+
+  const _endGame = (winningCombo) => {
+    _winningCombo = winningCombo;
+
+    render();
+  };
+
+  const _getEmptySquareIds = () => {
+    let emptySquareIds = [];
+    _gameData.forEach((symbol, i) => symbol === 0 && emptySquareIds.push(i));
+    return emptySquareIds;
+  };
+
+  const _getOccupiedSquareIds = (playerSymbol = _currentPlayer.symbol) => {
+    let occupiedSquareIds = _gameData
+      .map((symbol, i) => {
+        if (symbol !== 0 && symbol.toUpperCase() === playerSymbol) {
+          return i;
+        }
+      })
+      .filter((item) => item !== undefined);
+
+    return occupiedSquareIds;
   };
 
   const _computerMove = () => {
@@ -159,6 +207,9 @@ const Game = (() => {
     };
 
     const getRandomMove = () => {
+      const _getRandomInt = (max) => {
+        return Math.floor(Math.random() * Math.floor(max));
+      };
       const emptySquareIds = _getEmptySquareIds();
       const randomIndex = _getRandomInt(emptySquareIds.length);
       return emptySquareIds[randomIndex];
@@ -251,55 +302,6 @@ const Game = (() => {
     }
 
     render();
-  };
-
-  const _getEmptySquareIds = () => {
-    let emptySquareIds = [];
-    _gameData.forEach((symbol, i) => symbol === 0 && emptySquareIds.push(i));
-    return emptySquareIds;
-  };
-
-  const _getOccupiedSquareIds = (playerSymbol = _currentPlayer.symbol) => {
-    let occupiedSquareIds = _gameData
-      .map((symbol, i) => {
-        if (symbol !== 0 && symbol.toUpperCase() === playerSymbol) {
-          return i;
-        }
-      })
-      .filter((item) => item !== undefined);
-
-    return occupiedSquareIds;
-  };
-
-  const _getRandomInt = (max) => {
-    return Math.floor(Math.random() * Math.floor(max));
-  };
-
-  const _getIsWinner = () => _winningCombo.length > 0;
-  const _getIsTie = () => !_gameData.some((value) => value === 0);
-  const _getIsGameOver = () => _getIsWinner() || _getIsTie();
-
-  const _checkWinner = () => {
-    const occupiedSquareIds = _getOccupiedSquareIds();
-
-    const winningCombo = winningCombos.find((winningCombo) =>
-      winningCombo.every((i) => occupiedSquareIds.includes(i))
-    );
-
-    if (winningCombo) _endGame(winningCombo);
-    return;
-  };
-
-  const _endGame = (winningCombo) => {
-    _winningCombo = winningCombo;
-
-    render();
-  };
-
-  const render = () => {
-    let game = document.querySelector('.game');
-    if (game) game.remove();
-    root.appendChild(_create());
   };
 
   const _getPrompt = () => {
@@ -456,7 +458,7 @@ const Menu = (() => {
   };
 
   const reset = () => {
-    _display = true;
+    //_display = true;
     _current = 'main-menu';
     _playerOneName = '';
     _playerTwoName = '';
@@ -484,7 +486,7 @@ const Menu = (() => {
 
     const heading = document.createElement('h2');
     heading.classList = 'menu__heading';
-    heading.innerHTML = 'Menu';
+    heading.innerHTML = _current === 'new-game-menu' ? 'New Game' : 'Menu';
     menu.appendChild(heading);
 
     // Main Menu
@@ -508,7 +510,6 @@ const Menu = (() => {
     newGameBtn.classList = 'menu__btn';
     newGameBtn.innerHTML = 'New Game';
     newGameBtn.addEventListener('click', () => {
-      Game.reset();
       _toggleCurrent();
     });
     mainMenu.appendChild(newGameBtn);
@@ -675,6 +676,7 @@ const Header = (() => {
     hamburger.addEventListener('click', () => {
       if (Game.getIsGameInProgress()) {
         Menu.toggleDisplay();
+        Menu.reset();
         Game.toggleDisplay();
       }
     });
