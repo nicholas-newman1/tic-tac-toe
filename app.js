@@ -63,7 +63,7 @@ const Game = (() => {
   const render = () => {
     let game = document.querySelector('.game');
     if (game) game.remove();
-    root.appendChild(_create());
+    root.appendChild(_createGameBoard());
   };
 
   const continueGame = () => {
@@ -314,7 +314,7 @@ const Game = (() => {
     }
   };
 
-  const _create = () => {
+  const _createGameBoard = () => {
     const game = document.createElement('div');
     game.classList = _display ? 'game' : 'game hidden';
 
