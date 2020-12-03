@@ -112,11 +112,11 @@ const Game = (() => {
   };
 
   const _computerMove = () => {
-    const computerOccupiedSquareIds = _getOccupiedSquareIds();
-    const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
-
     // check if computer has a winning move and return it
     const getWinningMove = () => {
+      const computerOccupiedSquareIds = _getOccupiedSquareIds();
+      const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
+
       /* find combo that has two of its squares occupied by computer and none
       occupied by the user */
       const potentialWinningCombo = winningCombos.find((winningCombo) => {
@@ -137,6 +137,9 @@ const Game = (() => {
 
     // check if user has a winning move and return it
     const getPreventativeMove = () => {
+      const computerOccupiedSquareIds = _getOccupiedSquareIds();
+      const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
+
       /* find winningCombo that has two of its squares occupied by user and none
       occupied by the computer */
       const potentialWinningCombo = winningCombos.find((winningCombo) => {
@@ -169,6 +172,52 @@ const Game = (() => {
       return typeof getPreventativeMove() === 'number';
     };
 
+    /* returns true if current move number === num (ex: isMove(1) returns true
+    if it is currently the first move of the game) */
+    const isMove = (num) => {
+      return 10 - _getEmptySquareIds().length === num;
+    };
+
+    // choose opposite corner
+    const getThirdMove = () => {
+      const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
+      const userMove = userOccupiedSquareIds[0];
+      if ([1, 2, 5].includes(userMove)) return 6;
+      if ([3, 6, 7, 8].includes(userMove)) return 2;
+      return 8;
+    };
+
+    // choose another opposite corner
+    const getFifthMove = () => {
+      const userOccupiedSquareIds = _getOccupiedSquareIds(_playerOne.symbol);
+      if (
+        userOccupiedSquareIds.some((id) => [1, 2, 5].includes(id)) &&
+        userOccupiedSquareIds.includes(3)
+      ) {
+        return 8;
+      }
+
+      if (
+        userOccupiedSquareIds.some((id) => [3, 6, 7, 8].includes(id)) &&
+        userOccupiedSquareIds.includes(1)
+      ) {
+        return userOccupiedSquareIds.includes(8) ? 6 : 8;
+      }
+    };
+
+    // if available, choose center, otherwise choose corner
+    const getSecondMove = () => {
+      const emptySquareIds = _getEmptySquareIds();
+      if (emptySquareIds.includes(4)) return 4;
+      return 0;
+    };
+
+    // choose a side
+    const getFourthMove = () => {
+      const emptySquareIds = _getEmptySquareIds();
+      return [1, 3, 5, 7].find((id) => emptySquareIds.includes(id));
+    };
+
     if (_difficulty === 'easy') {
       _makeMove(getRandomMove());
     } else if (_difficulty === 'medium') {
@@ -180,15 +229,25 @@ const Game = (() => {
         _makeMove(getRandomMove());
       }
     } else if (_difficulty === 'hard') {
-      if (isWinningMoveAvailable()) {
+      if (isMove(1)) {
+        _makeMove(0);
+      } else if (isMove(2)) {
+        _makeMove(getSecondMove());
+      } else if (isMove(3)) {
+        _makeMove(getThirdMove());
+      } else if (isWinningMoveAvailable()) {
         _makeMove(getWinningMove());
       } else if (isPreventativeMoveAvailable()) {
         _makeMove(getPreventativeMove());
+      } else if (isMove(4)) {
+        _makeMove(getFourthMove());
+      } else if (isMove(5)) {
+        _makeMove(getFifthMove());
       } else {
         _makeMove(getRandomMove());
       }
     } else {
-      throw new Error('Invalid _difficulty');
+      throw new Error('Invalid difficulty');
     }
 
     render();
@@ -233,6 +292,8 @@ const Game = (() => {
 
   const _endGame = (winningCombo) => {
     _winningCombo = winningCombo;
+
+    render();
   };
 
   const render = () => {
