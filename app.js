@@ -434,6 +434,17 @@ const Menu = (() => {
     root.appendChild(_create());
   };
 
+  const reset = () => {
+    //_display = true;
+    _current = 'main-menu';
+    _playerOneName = '';
+    _playerTwoName = '';
+    _mode = 'singleplayer';
+    _difficulty = 'easy';
+
+    render();
+  };
+
   const getData = () => {
     return {
       playerOneName: _playerOneName,
@@ -453,17 +464,6 @@ const Menu = (() => {
     _current === 'main-menu'
       ? (_current = 'new-game-menu')
       : (_current = 'main-menu');
-
-    render();
-  };
-
-  const reset = () => {
-    //_display = true;
-    _current = 'main-menu';
-    _playerOneName = '';
-    _playerTwoName = '';
-    _mode = 'singleplayer';
-    _difficulty = 'easy';
 
     render();
   };
