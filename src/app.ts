@@ -1,22 +1,28 @@
-const root = document.querySelector('#root');
+const root = document.querySelector('#root')!;
 
 const Game = (() => {
-  let _playerOne = { symbol: 'X' };
-  let _playerTwo = { symbol: 'O' };
-  let _mode;
+  let _playerOne: { symbol: 'X' | 'O'; name: string } = {
+    symbol: 'X',
+    name: 'Player 1',
+  };
+  let _playerTwo: { symbol: 'X' | 'O'; name: string } = {
+    symbol: 'O',
+    name: 'Player 2',
+  };
+  let _mode: 'singleplayer' | 'twoplayer';
   let _difficulty = 'easy';
   let _display = false;
   let _isGameInProgress = false;
   let _currentPlayer = _playerOne;
   let _firstPlayer = _playerOne;
-  let _winningCombo = [];
+  let _winningCombo: number[] = [];
 
   /* 0 = empty    
   'X' = animate X  
   'x' = static X  
   'O' = animate O  
   'o' = static O */
-  let _gameData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+  let _gameData: (0 | 'x' | 'X' | 'o' | 'O')[] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const winningCombos = [
     [0, 1, 2],
@@ -29,7 +35,13 @@ const Game = (() => {
     [2, 4, 6],
   ];
 
-  const init = ({ playerOneName, playerTwoName, mode, difficulty }) => {
+  const init = (data: {
+    playerOneName: string;
+    playerTwoName: string;
+    mode: 'singleplayer' | 'twoplayer';
+    difficulty: 'easy' | 'medium' | 'hard';
+  }) => {
+    const { playerOneName, playerTwoName, mode, difficulty } = data;
     reset();
 
     if (mode === 'singleplayer') {
@@ -87,11 +99,11 @@ const Game = (() => {
 
   const getIsGameInProgress = () => _isGameInProgress;
 
-  const _getOppositePlayer = (player) => {
+  const _getOppositePlayer = (player: { symbol: string; name: string }) => {
     return player === _playerOne ? _playerTwo : _playerOne;
   };
 
-  const _makeMove = (id) => {
+  const _makeMove = (id: number) => {
     _gameData = _gameData.map((item) => {
       if (item === 'X') return 'x';
       if (item === 'O') return 'o';
@@ -127,34 +139,33 @@ const Game = (() => {
   const _checkWinner = () => {
     const occupiedSquareIds = _getOccupiedSquareIds();
 
-    const winningCombo = winningCombos.find((winningCombo) =>
-      winningCombo.every((i) => occupiedSquareIds.includes(i))
-    );
+    const winningCombo = winningCombos.find((winningCombo) => {
+      return winningCombo.every((i) => occupiedSquareIds.includes(i));
+    });
 
     if (winningCombo) _endGame(winningCombo);
-    return;
   };
 
-  const _endGame = (winningCombo) => {
+  const _endGame = (winningCombo: number[]) => {
     _winningCombo = winningCombo;
 
     render();
   };
 
   const _getEmptySquareIds = () => {
-    let emptySquareIds = [];
+    let emptySquareIds: number[] = [];
     _gameData.forEach((symbol, i) => symbol === 0 && emptySquareIds.push(i));
     return emptySquareIds;
   };
 
   const _getOccupiedSquareIds = (playerSymbol = _currentPlayer.symbol) => {
-    let occupiedSquareIds = _gameData
-      .map((symbol, i) => {
-        if (symbol !== 0 && symbol.toUpperCase() === playerSymbol) {
-          return i;
-        }
-      })
-      .filter((item) => item !== undefined);
+    let occupiedSquareIds: number[] = [];
+
+    _gameData.forEach((symbol, i) => {
+      if (symbol !== 0 && symbol.toUpperCase() === playerSymbol) {
+        occupiedSquareIds.push(i);
+      }
+    });
 
     return occupiedSquareIds;
   };
@@ -177,10 +188,12 @@ const Game = (() => {
 
       if (potentialWinningCombo) {
         // return computer's winning move
-        return potentialWinningCombo.find(
+        var winningMove = potentialWinningCombo.find(
           (id) => !computerOccupiedSquareIds.includes(id)
         );
       }
+
+      return winningMove !== undefined ? winningMove : -1;
     };
 
     // check if user has a winning move and return it
@@ -200,14 +213,16 @@ const Game = (() => {
 
       if (potentialWinningCombo) {
         // return user's winning move
-        return potentialWinningCombo.find(
+        var preventativeMove = potentialWinningCombo.find(
           (id) => !userOccupiedSquareIds.includes(id)
         );
       }
+
+      return preventativeMove !== undefined ? preventativeMove : -1;
     };
 
     const getRandomMove = () => {
-      const _getRandomInt = (max) => {
+      const _getRandomInt = (max: number) => {
         return Math.floor(Math.random() * Math.floor(max));
       };
       const emptySquareIds = _getEmptySquareIds();
@@ -215,17 +230,9 @@ const Game = (() => {
       return emptySquareIds[randomIndex];
     };
 
-    const isWinningMoveAvailable = () => {
-      return typeof getWinningMove() === 'number';
-    };
-
-    const isPreventativeMoveAvailable = () => {
-      return typeof getPreventativeMove() === 'number';
-    };
-
     /* returns true if current move number === num (ex: isMove(1) returns true
     if it is currently the first move of the game) */
-    const isMove = (num) => {
+    const isMove = (num: number) => {
       return 10 - _getEmptySquareIds().length === num;
     };
 
@@ -254,6 +261,8 @@ const Game = (() => {
       ) {
         return userOccupiedSquareIds.includes(8) ? 6 : 8;
       }
+
+      return -1;
     };
 
     // if available, choose center, otherwise choose corner
@@ -266,15 +275,18 @@ const Game = (() => {
     // choose a side
     const getFourthMove = () => {
       const emptySquareIds = _getEmptySquareIds();
-      return [1, 3, 5, 7].find((id) => emptySquareIds.includes(id));
+      const emptySquareId = [1, 3, 5, 7].find((id) =>
+        emptySquareIds.includes(id)
+      );
+      return emptySquareId ? emptySquareId : -1;
     };
 
     if (_difficulty === 'easy') {
       _makeMove(getRandomMove());
     } else if (_difficulty === 'medium') {
-      if (isWinningMoveAvailable()) {
+      if (getWinningMove() !== -1) {
         _makeMove(getWinningMove());
-      } else if (isPreventativeMoveAvailable()) {
+      } else if (getPreventativeMove() !== -1) {
         _makeMove(getPreventativeMove());
       } else {
         _makeMove(getRandomMove());
@@ -286,9 +298,9 @@ const Game = (() => {
         _makeMove(getSecondMove());
       } else if (isMove(3)) {
         _makeMove(getThirdMove());
-      } else if (isWinningMoveAvailable()) {
+      } else if (getWinningMove() !== -1) {
         _makeMove(getWinningMove());
-      } else if (isPreventativeMoveAvailable()) {
+      } else if (getPreventativeMove() !== -1) {
         _makeMove(getPreventativeMove());
       } else if (isMove(4)) {
         _makeMove(getFourthMove());
@@ -316,42 +328,49 @@ const Game = (() => {
 
   const _createGameBoard = () => {
     const game = document.createElement('div');
-    game.classList = _display ? 'game' : 'game hidden';
+    game.classList.value = _display ? 'game' : 'game hidden';
 
     const gameBoard = document.createElement('div');
-    gameBoard.classList = 'game__board';
+    gameBoard.classList.value = 'game__board';
     game.appendChild(gameBoard);
 
     _gameData.forEach((symbol, i) => {
       const square = document.createElement('div');
-      square.id = i;
-      square.classList = 'game__square';
-      _winningCombo.includes(i) && square.classList.add('game__square--winner');
+      square.id = i.toString();
+      square.classList.value = 'game__square';
+      _winningCombo.includes(i) &&
+        (square.classList.value = 'game__square game__square--winner');
 
       if (symbol === 0) {
         square.addEventListener('click', (e) => {
-          !_getIsGameOver() && _makeMove(e.currentTarget.id);
+          const square = e.currentTarget as HTMLDivElement;
+          !_getIsGameOver() && _makeMove(+square.id);
         });
       } else {
-        if (symbol.toLowerCase() === 'x') square.appendChild(_createX(symbol));
-        if (symbol.toLowerCase() === 'o') square.appendChild(_createO(symbol));
+        if (symbol === 'x' || symbol === 'X') {
+          square.appendChild(_createX(symbol));
+        }
+        if (symbol === 'o' || symbol === 'O') {
+          square.appendChild(_createO(symbol));
+        }
       }
 
       gameBoard.appendChild(square);
     });
 
     const promptContainer = document.createElement('div');
-    promptContainer.classList = 'game__prompt-container';
+    promptContainer.classList.value = 'game__prompt-container';
     game.appendChild(promptContainer);
 
     const prompt = document.createElement('h2');
-    prompt.classList = 'game__prompt';
+    prompt.classList.value = 'game__prompt';
     prompt.innerHTML = _getPrompt();
     promptContainer.appendChild(prompt);
 
     const continueBtn = document.createElement('button');
-    continueBtn.classList = 'game__continue';
-    !_getIsGameOver() && continueBtn.classList.add('hidden');
+    continueBtn.classList.value = 'game__continue';
+    !_getIsGameOver() &&
+      (continueBtn.classList.value = 'game__continue hidden');
     continueBtn.innerHTML = 'Continue';
     continueBtn.addEventListener('click', continueGame);
     promptContainer.appendChild(continueBtn);
@@ -359,18 +378,20 @@ const Game = (() => {
     return game;
   };
 
-  const _createX = (symbol) => {
+  const _createX = (symbol: 'x' | 'X') => {
     const animate = symbol === symbol.toUpperCase();
 
     const x = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    x.classList = 'game__svg';
+    x.classList.value = 'game__svg';
     x.setAttributeNS(null, 'viewBox', '0 0 24 24');
 
     const path1 = document.createElementNS(
       'http://www.w3.org/2000/svg',
       'path'
     );
-    path1.classList = `game__path ${animate ? 'game__path--animate-x-1' : ''}`;
+    path1.classList.value = `game__path ${
+      animate ? 'game__path--animate-x-1' : ''
+    }`;
     path1.setAttributeNS(
       null,
       'd',
@@ -382,7 +403,9 @@ const Game = (() => {
       'http://www.w3.org/2000/svg',
       'path'
     );
-    path2.classList = `game__path ${animate ? 'game__path--animate-x-2' : ''}`;
+    path2.classList.value = `game__path ${
+      animate ? 'game__path--animate-x-2' : ''
+    }`;
     path2.setAttributeNS(
       null,
       'd',
@@ -393,15 +416,17 @@ const Game = (() => {
     return x;
   };
 
-  const _createO = (symbol) => {
+  const _createO = (symbol: 'o' | 'O') => {
     const animate = symbol === symbol.toUpperCase();
 
     const o = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    o.classList = 'game__svg';
+    o.classList.value = 'game__svg';
     o.setAttributeNS(null, 'viewBox', '0 0 24 24');
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.classList = `game__path ${animate ? 'game__path--animate-o' : ''}`;
+    path.classList.value = `game__path ${
+      animate ? 'game__path--animate-o' : ''
+    }`;
     path.setAttributeNS(
       null,
       'd',
@@ -425,8 +450,8 @@ const Menu = (() => {
   let _current = 'main-menu';
   let _playerOneName = '';
   let _playerTwoName = '';
-  let _mode = 'singleplayer';
-  let _difficulty = 'easy';
+  let _mode: 'singleplayer' | 'twoplayer' = 'singleplayer';
+  let _difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 
   const render = () => {
     let menu = document.querySelector('.menu');
@@ -435,7 +460,6 @@ const Menu = (() => {
   };
 
   const reset = () => {
-    //_display = true;
     _current = 'main-menu';
     _playerOneName = '';
     _playerTwoName = '';
@@ -468,13 +492,13 @@ const Menu = (() => {
     render();
   };
 
-  const _setMode = (value) => {
+  const _setMode = (value: 'singleplayer' | 'twoplayer') => {
     _mode = value;
 
     render();
   };
 
-  const _setDifficulty = (value) => {
+  const _setDifficulty = (value: 'easy' | 'medium' | 'hard') => {
     _difficulty = value;
 
     render();
@@ -482,21 +506,21 @@ const Menu = (() => {
 
   const _create = () => {
     const menu = document.createElement('div');
-    menu.classList = _display ? 'menu' : 'menu hidden';
+    menu.classList.value = _display ? 'menu' : 'menu hidden';
 
     const heading = document.createElement('h2');
-    heading.classList = 'menu__heading';
+    heading.classList.value = 'menu__heading';
     heading.innerHTML = _current === 'new-game-menu' ? 'New Game' : 'Menu';
     menu.appendChild(heading);
 
     // Main Menu
     const mainMenu = document.createElement('div');
-    mainMenu.classList =
+    mainMenu.classList.value =
       _current === 'main-menu' ? 'main-menu' : 'main-menu hidden';
     menu.appendChild(mainMenu);
 
     const resumeBtn = document.createElement('button');
-    resumeBtn.classList = Game.getIsGameInProgress()
+    resumeBtn.classList.value = Game.getIsGameInProgress()
       ? 'menu__btn'
       : 'menu__btn hidden';
     resumeBtn.innerHTML = 'Resume';
@@ -507,7 +531,7 @@ const Menu = (() => {
     mainMenu.appendChild(resumeBtn);
 
     const newGameBtn = document.createElement('button');
-    newGameBtn.classList = 'menu__btn';
+    newGameBtn.classList.value = 'menu__btn';
     newGameBtn.innerHTML = 'New Game';
     newGameBtn.addEventListener('click', () => {
       _toggleCurrent();
@@ -516,36 +540,37 @@ const Menu = (() => {
 
     // New Game Menu
     const newGameMenu = document.createElement('div');
-    newGameMenu.classList =
+    newGameMenu.classList.value =
       _current === 'new-game-menu' ? 'new-game-menu' : 'new-game-menu hidden';
+
     menu.appendChild(newGameMenu);
 
     const playerContainer = document.createElement('div');
-    playerContainer.classList =
+    playerContainer.classList.value =
       _mode === 'twoplayer'
         ? 'new-game-menu__players'
         : 'new-game-menu__players hidden';
     newGameMenu.appendChild(playerContainer);
 
     const playerOneLabel = document.createElement('label');
-    playerOneLabel.classList = 'new-game-menu__player-label';
+    playerOneLabel.classList.value = 'new-game-menu__player-label';
     playerOneLabel.innerHTML = 'Player 1';
     playerContainer.appendChild(playerOneLabel);
 
     const playerOneInput = document.createElement('input');
-    playerOneInput.classList = 'new-game-menu__player-input';
+    playerOneInput.classList.value = 'new-game-menu__player-input';
     playerOneInput.addEventListener('change', () => {
       _playerOneName = playerOneInput.value;
     });
     playerOneLabel.appendChild(playerOneInput);
 
     const playerTwoLabel = document.createElement('label');
-    playerTwoLabel.classList = 'new-game-menu__player-label';
+    playerTwoLabel.classList.value = 'new-game-menu__player-label';
     playerTwoLabel.innerHTML = 'Player 2';
     playerContainer.appendChild(playerTwoLabel);
 
     const playerTwoInput = document.createElement('input');
-    playerTwoInput.classList = 'new-game-menu__player-input';
+    playerTwoInput.classList.value = 'new-game-menu__player-input';
     playerTwoInput.addEventListener('change', () => {
       _playerTwoName = playerTwoInput.value;
     });
@@ -553,29 +578,29 @@ const Menu = (() => {
 
     // Mode Input Container
     const modeContainer = document.createElement('div');
-    modeContainer.classList = 'new-game-menu__radio-container';
+    modeContainer.classList.value = 'new-game-menu__radio-container';
     newGameMenu.appendChild(modeContainer);
 
     const modeHeading = document.createElement('h3');
-    modeHeading.classList = 'new-game-menu__sub-heading';
+    modeHeading.classList.value = 'new-game-menu__sub-heading';
     modeHeading.innerHTML = 'Mode';
     modeContainer.appendChild(modeHeading);
 
     const modeInputContainer = document.createElement('div');
-    modeInputContainer.classList = 'new-game-menu__radio-inputs';
+    modeInputContainer.classList.value = 'new-game-menu__radio-inputs';
     modeContainer.appendChild(modeInputContainer);
 
     const singleplayerLabel = document.createElement('label');
-    singleplayerLabel.classList = 'new-game-menu__radio-label';
+    singleplayerLabel.classList.value = 'new-game-menu__radio-label';
     singleplayerLabel.innerHTML = '1-Player';
     modeInputContainer.appendChild(singleplayerLabel);
 
     const singleplayerInput = document.createElement('input');
-    singleplayerInput.classList = 'new-game-menu__radio-input';
+    singleplayerInput.classList.value = 'new-game-menu__radio-input';
     singleplayerInput.type = 'radio';
     singleplayerInput.value = 'singleplayer';
     singleplayerInput.name = 'mode';
-    if (_mode === 'singleplayer') singleplayerInput.checked = 'checked';
+    if (_mode === 'singleplayer') singleplayerInput.checked = true;
     singleplayerInput.addEventListener('change', () =>
       _setMode('singleplayer')
     );
@@ -585,46 +610,49 @@ const Menu = (() => {
     );
 
     const twoplayerLabel = document.createElement('label');
-    twoplayerLabel.classList = 'new-game-menu__radio-label';
+    twoplayerLabel.classList.value = 'new-game-menu__radio-label';
     twoplayerLabel.innerHTML = '2-Player';
     modeInputContainer.appendChild(twoplayerLabel);
 
     const twoplayerInput = document.createElement('input');
-    twoplayerInput.classList = 'new-game-menu__radio-input';
+    twoplayerInput.classList.value = 'new-game-menu__radio-input';
     twoplayerInput.type = 'radio';
     twoplayerInput.value = 'twoplayer';
     twoplayerInput.name = 'mode';
-    if (_mode === 'twoplayer') twoplayerInput.checked = 'checked';
+    if (_mode === 'twoplayer') twoplayerInput.checked = true;
     twoplayerInput.addEventListener('change', () => _setMode('twoplayer'));
     twoplayerLabel.insertBefore(twoplayerInput, twoplayerLabel.firstChild);
 
     // Difficulty Input Container
     const difficultyContainer = document.createElement('div');
-    difficultyContainer.classList = 'new-game-menu__radio-container';
-    _mode === 'twoplayer' && difficultyContainer.classList.add('hidden');
+    difficultyContainer.classList.value = 'new-game-menu__radio-container';
+    _mode === 'twoplayer' && (difficultyContainer.classList.value = 'hidden');
     newGameMenu.appendChild(difficultyContainer);
 
     const difficultyHeading = document.createElement('h3');
-    difficultyHeading.classList = 'new-game-menu__sub-heading';
+    difficultyHeading.classList.value = 'new-game-menu__sub-heading';
     difficultyHeading.innerHTML = 'Difficulty';
     difficultyContainer.appendChild(difficultyHeading);
 
     const difficultyInputContainer = document.createElement('div');
-    difficultyInputContainer.classList = 'new-game-menu__radio-inputs';
+    difficultyInputContainer.classList.value = 'new-game-menu__radio-inputs';
     difficultyContainer.appendChild(difficultyInputContainer);
 
-    const _appendDifficultyInput = (value, labelText) => {
+    const _appendDifficultyInput = (
+      value: 'easy' | 'medium' | 'hard',
+      labelText: string
+    ) => {
       const label = document.createElement('label');
-      label.classList = 'new-game-menu__radio-label';
+      label.classList.value = 'new-game-menu__radio-label';
       label.innerHTML = labelText;
       difficultyInputContainer.appendChild(label);
 
       const input = document.createElement('input');
-      input.classList = 'new-game-menu__radio-input';
+      input.classList.value = 'new-game-menu__radio-input';
       input.type = 'radio';
       input.value = value;
       input.name = 'difficulty';
-      if (_difficulty === value) input.checked = 'checked';
+      if (_difficulty === value) input.checked = true;
       input.addEventListener('change', () => _setDifficulty(value));
       label.insertBefore(input, label.firstChild);
     };
@@ -635,7 +663,7 @@ const Menu = (() => {
 
     const startBtn = document.createElement('button');
     startBtn.id = 'start-btn';
-    startBtn.classList = 'menu__btn';
+    startBtn.classList.value = 'menu__btn';
     startBtn.innerHTML = 'Start';
     newGameMenu.appendChild(startBtn);
 
@@ -659,20 +687,20 @@ const Header = (() => {
 
   const _createHeader = () => {
     const header = document.createElement('div');
-    header.classList = 'header';
+    header.classList.value = 'header';
 
     const container = document.createElement('div');
-    container.classList = 'header__container';
+    container.classList.value = 'header__container';
     header.appendChild(container);
 
     const heading = document.createElement('h1');
-    heading.classList = 'header__heading';
+    heading.classList.value = 'header__heading';
     heading.innerHTML = 'Tic Tac Toe';
     container.appendChild(heading);
 
     const hamburger = document.createElement('button');
     hamburger.id = 'hamburger';
-    hamburger.classList = 'header__hamburger';
+    hamburger.classList.value = 'header__hamburger';
     hamburger.addEventListener('click', () => {
       if (Game.getIsGameInProgress()) {
         Menu.toggleDisplay();
@@ -683,7 +711,7 @@ const Header = (() => {
     container.appendChild(hamburger);
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.classList = 'header__svg';
+    svg.classList.value = 'header__svg';
     svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
     hamburger.appendChild(svg);
 
@@ -708,7 +736,8 @@ const App = (() => {
   Menu.render(); // inject menu
 
   document.addEventListener('click', (e) => {
-    if (e.target.id === 'start-btn') {
+    const target = e.target as HTMLElement;
+    if (target.id === 'start-btn') {
       Game.init(Menu.getData());
       Menu.reset();
       Menu.toggleDisplay();

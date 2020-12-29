@@ -11,20 +11,21 @@ const copyHtml = () => {
 };
 
 const compileTs = () => {
-  return gulp
-    .src('src/app.ts')
-    .pipe(sourcemaps.init())
-    .pipe(
-      ts({
-        noImplicitAny: true,
-        outFile: 'app.js',
-        noEmitOnError: false,
-      })
-    )
-    .pipe(minify())
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('dist'));
+  return (
+    gulp
+      .src('src/app.ts')
+      .pipe(sourcemaps.init())
+      .pipe(
+        ts({
+          target: 'es2016',
+          outFile: 'app.js',
+        })
+      )
+      //.pipe(minify())
+      //.pipe(rename({ suffix: '.min' }))
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest('dist'))
+  );
 };
 
 const compileSass = () => {
