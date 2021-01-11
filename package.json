@@ -4,7 +4,7 @@
   "description": "A basic tic tac toe game which can be played with one or two players.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "gulp"
   },
   "repository": {
     "type": "git",
