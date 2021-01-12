@@ -1,0 +1,136 @@
+@use '../../config' as *;
+
+.menu {
+  width: 90vw;
+  max-width: 500px;
+  padding: 1.5rem;
+  background: #444;
+  border-radius: 5px;
+  margin: 0 auto;
+  margin-top: 2rem;
+
+  @media (max-height: 350px) {
+    margin-top: 0.5rem;
+  }
+
+  &__heading {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 auto;
+    margin-bottom: 1.5rem;
+    position: relative;
+    @include centerX();
+    display: inline-block;
+
+    &::after {
+      content: '';
+      height: 3px;
+      width: 60px;
+      background: white;
+      position: absolute;
+      top: 100%;
+      @include centerX();
+    }
+  }
+
+  &__btn {
+    font-size: 1.5rem;
+    border-radius: 5px;
+    border: none;
+    padding: 0.5rem 0;
+    background: #ddd;
+    transition: 300ms;
+
+    &:hover {
+      cursor: pointer;
+      background: #bbb;
+    }
+  }
+
+  &__btn {
+    margin-top: 1rem;
+  }
+}
+
+.main-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-game-menu {
+  display: flex;
+  flex-direction: column;
+
+  &__players {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__player-label,
+  &__radio-label {
+    color: white;
+    font-size: 1.25rem;
+  }
+
+  &__player-label + &__player-label {
+    margin-top: 1rem;
+  }
+
+  &__player-input {
+    width: 100%;
+    padding: 0.25rem;
+    font-size: 1.25rem;
+    background: #ddd;
+    border: none;
+    border-radius: 5px;
+    margin-top: 0.5rem;
+  }
+
+  &__sub-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 auto;
+    position: relative;
+    @include centerX();
+    display: inline-block;
+
+    &::after {
+      content: '';
+      height: 2px;
+      width: 30px;
+      background: white;
+      position: absolute;
+      top: 100%;
+      @include centerX();
+    }
+  }
+
+  &__radio-container {
+    background: #555;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border-radius: 5px;
+  }
+
+  &__radio-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+
+  &__radio-label {
+    margin: 0 1rem;
+    margin-top: 1rem;
+  }
+
+  &__radio-input {
+    margin-right: 0.5rem;
+  }
+
+  &__radio-label,
+  &__radio-input {
+    cursor: pointer;
+  }
+}

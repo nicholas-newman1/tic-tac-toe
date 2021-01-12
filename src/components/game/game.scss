@@ -1,0 +1,110 @@
+@mixin strokeAnimation($offset) {
+  @keyframes dash {
+    from {
+      stroke-dashoffset: $offset;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+.game {
+  &__board {
+    height: 400px;
+    width: 400px;
+    margin: 0 auto;
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.5rem;
+    background: #444;
+    border: 0.5rem solid #444;
+
+    @media (max-width: 650px), (max-height: 650px) {
+      height: 300px;
+      width: 300px;
+    }
+
+    @media (max-width: 550px), (max-height: 550px) {
+      height: 200px;
+      width: 200px;
+      gap: 0.25rem;
+      border: 0.25rem solid #444;
+    }
+
+    @media (max-height: 415px) {
+      height: 150px;
+      width: 150px;
+    }
+  }
+
+  &__prompt-container {
+    color: white;
+    text-align: center;
+    margin-top: 2rem;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+
+    @media (max-height: 415px) {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  &__continue {
+    font-size: 1.25rem;
+    background: #ddd;
+    border: none;
+    padding: 0.25rem 1rem;
+    border-radius: 5px;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    transition: 300ms;
+
+    &:hover {
+      background: #bbb;
+    }
+  }
+
+  &__square {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    stroke: white;
+  }
+
+  &__square--winner {
+    stroke: red;
+  }
+
+  &__svg {
+    width: 60%;
+  }
+
+  &__path {
+    fill: none;
+    stroke-width: 1.42416;
+  }
+
+  &__path--animate-x-1,
+  &__path--animate-x-2 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: dash 0.5s linear forwards;
+    @include strokeAnimation(100);
+  }
+
+  &__path--animate-x-2 {
+    animation: dash 0.5s linear forwards 0.3s;
+  }
+
+  &__path--animate-o {
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    animation: dash 0.7s linear forwards;
+    @include strokeAnimation(150);
+  }
+}
